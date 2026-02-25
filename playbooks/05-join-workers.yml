@@ -2,10 +2,6 @@
   become: yes
   tasks:
 
-    - name: Read join command
-      slurp:
-        src: /tmp/kubeinit.log
-      register: join_cmd
-
-    - name: Join cluster
-      command: "{{ join_cmd.content | b64decode }}"
+    - name: Join Kubernetes cluster
+      command: "{{ hostvars['k8s-master']['kube_join_cmd'] }} --ignore-preflight-errors=all"
+      # يمكن إضافة "creates: /etc/kubernetes/kubelet.conf" لتجنب الانضمام أكثر من مرة

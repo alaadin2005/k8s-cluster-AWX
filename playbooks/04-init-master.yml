@@ -2,11 +2,16 @@
   become: yes
   tasks:
 
-    - name: Initialize cluster
+    - name: Initialize Kubernetes cluster
       command: kubeadm init --pod-network-cidr=10.244.0.0/16
       register: init_output
+      ignore_errors: yes  # لتجنب توقف Playbook لو فشل init
 
-    - name: Save join command
-      copy:
-        content: "{{ init_output.stdout }}"
-        dest: /tmp/kubeinit.log
+    - name: Extract kubeadm join command
+      set_fact:
+        kube_join_cmd: >-
+          {{ init_output.stdout_lines
+             | select('search', 'kubeadm join')
+             | list
+             | join(' ')
+          }}
