@@ -1,0 +1,12 @@
+- hosts: masters
+  become: yes
+  tasks:
+
+    - name: Initialize cluster
+      command: kubeadm init --pod-network-cidr=10.244.0.0/16
+      register: init_output
+
+    - name: Save join command
+      copy:
+        content: "{{ init_output.stdout }}"
+        dest: /tmp/kubeinit.log

@@ -1,0 +1,11 @@
+- hosts: workers
+  become: yes
+  tasks:
+
+    - name: Read join command
+      slurp:
+        src: /tmp/kubeinit.log
+      register: join_cmd
+
+    - name: Join cluster
+      command: "{{ join_cmd.content | b64decode }}"

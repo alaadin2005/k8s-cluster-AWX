@@ -1,0 +1,23 @@
+- hosts: all
+  become: yes
+  tasks:
+
+    - name: Disable swap
+      command: swapoff -a
+
+    - name: Remove swap from fstab
+      replace:
+        path: /etc/fstab
+        regexp: '^.*swap.*$'
+        replace: ''
+
+    - name: Load kernel modules
+      modprobe:
+        name: br_netfilter
+        state: present
+
+    - name: Set sysctl
+      sysctl:
+        name: net.bridge.bridge-nf-call-iptables
+        value: 1
+        state: present
