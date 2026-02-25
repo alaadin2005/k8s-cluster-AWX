@@ -1,0 +1,33 @@
+- hosts: all
+  become: yes
+  tasks:
+
+    - name: Install dependencies
+      apt:
+        name: apt-transport-https, ca-certificates, curl, gnupg
+        state: present
+        update_cache: yes
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable
+        state: present
+
+    - name: Install containerd
+      apt:
+        name: containerd.io
+        state: present
+        update_cache: yes
+
+    - name: Configure containerd
+      command: |
+        mkdir -p /etc/containerd
+        containerd config default > /etc/containerd/config.toml
+      args:
+        creates: /etc/containerd/config.toml
+
+    - name: Restart containerd
+      systemd:
+        name: containerd
+        state: restarted
+        enabled: yes

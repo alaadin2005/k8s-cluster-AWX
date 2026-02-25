@@ -2,10 +2,23 @@
   become: yes
   tasks:
 
+    - name: Reset previous cluster (ignore errors)
+      command: kubeadm reset -f
+      ignore_errors: yes
+
+    - name: Clean manifests
+      file:
+        path: /etc/kubernetes/manifests
+        state: absent
+
+    - name: Recreate manifests directory
+      file:
+        path: /etc/kubernetes/manifests
+        state: directory
+
     - name: Initialize Kubernetes cluster
       command: kubeadm init --pod-network-cidr=10.244.0.0/16
       register: init_output
-      ignore_errors: yes  # لتجنب توقف Playbook لو فشل init
 
     - name: Extract kubeadm join command
       set_fact:

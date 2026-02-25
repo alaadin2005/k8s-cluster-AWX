@@ -1,6 +1,5 @@
 - hosts: all
   become: yes
-
   tasks:
 
     - name: Install required packages
@@ -14,16 +13,13 @@
 
     - name: Add Kubernetes GPG key
       shell: |
-        curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.34/deb/Release.key | \
-        gpg --dearmor -o /usr/share/keyrings/kubernetes-archive-keyring.gpg
+        curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.34/deb/Release.key | gpg --dearmor -o /usr/share/keyrings/kubernetes-archive-keyring.gpg
       args:
         creates: /usr/share/keyrings/kubernetes-archive-keyring.gpg
 
     - name: Add Kubernetes apt repository
       shell: |
-        echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] \
-        https://pkgs.k8s.io/core:/stable:/v1.34/deb/ /" | \
-        tee /etc/apt/sources.list.d/kubernetes.list
+        echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.34/deb/ /" | tee /etc/apt/sources.list.d/kubernetes.list
       args:
         creates: /etc/apt/sources.list.d/kubernetes.list
 

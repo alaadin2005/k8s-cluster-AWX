@@ -1,9 +1,0 @@
-- hosts: all
-  become: yes
-  tasks:
-
-    - name: Install containerd
-      apt:
-        name: containerd
-        state: present
-        update_cache: yes

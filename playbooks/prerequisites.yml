@@ -1,0 +1,31 @@
+- hosts: all
+  become: yes
+  tasks:
+
+    - name: Disable Swap
+      command: swapoff -a
+
+    - name: Remove swap from fstab
+      lineinfile:
+        path: /etc/fstab
+        regexp: 'swap'
+        state: absent
+
+    - name: Load required kernel modules
+      modprobe:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - br_netfilter
+        - overlay
+
+    - name: Set sysctl parameters
+      sysctl:
+        name: "{{ item.key }}"
+        value: "{{ item.value }}"
+        state: present
+        reload: yes
+      loop:
+        - { key: net.bridge.bridge-nf-call-iptables, value: 1 }
+        - { key: net.bridge.bridge-nf-call-ip6tables, value: 1 }
+        - { key: net.ipv4.ip_forward, value: 1 }

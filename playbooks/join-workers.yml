@@ -4,4 +4,5 @@
 
     - name: Join Kubernetes cluster
       command: "{{ hostvars['k8s-master']['kube_join_cmd'] }} --ignore-preflight-errors=all"
-      # يمكن إضافة "creates: /etc/kubernetes/kubelet.conf" لتجنب الانضمام أكثر من مرة
+      args:
+        creates: /etc/kubernetes/kubelet.conf
