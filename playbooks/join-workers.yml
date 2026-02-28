@@ -1,8 +1,13 @@
-- hosts: workers
+- hosts: master
   become: yes
   tasks:
 
-    - name: Join cluster
-      command: "{{ hostvars['master']['kube_join_cmd'] }} --ignore-preflight-errors=all"
-      args:
-        creates: /etc/kubernetes/kubelet.conf
+    - name: Generate join command
+      command: kubeadm token create --print-join-command
+      register: join_cmd
+
+    - name: Join workers to cluster
+      become: yes
+      delegate_to: "{{ item }}"
+      command: "{{ join_cmd.stdout }}"
+      loop: "{{ groups['workers'] }}"
