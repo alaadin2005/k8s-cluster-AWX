@@ -1,19 +1,27 @@
-- hosts: masters
+- hosts: all
   become: yes
   tasks:
 
-    - name: Reset previous cluster
-      command: kubeadm reset -f
-      ignore_errors: yes
+    - name: Add Kubernetes GPG key
+      shell: |
+        curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.34/deb/Release.key | gpg --dearmor -o /usr/share/keyrings/kubernetes-archive-keyring.gpg
+      args:
+        creates: /usr/share/keyrings/kubernetes-archive-keyring.gpg
 
-    - name: Initialize cluster
-      command: kubeadm init --pod-network-cidr=10.244.0.0/16
-      register: init_output
+    - name: Add Kubernetes repository
+      shell: |
+        echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.34/deb/ /" | tee /etc/apt/sources.list.d/kubernetes.list
+      args:
+        creates: /etc/apt/sources.list.d/kubernetes.list
 
-    - name: Extract join command
-      set_fact:
-        kube_join_cmd: >-
-          {{ init_output.stdout_lines
-             | select('search', 'kubeadm join')
-             | list
-             | join(' ') }}
+    - name: Update apt
+      apt:
+        update_cache: yes
+
+    - name: Install kubelet kubeadm kubectl
+      apt:
+        name:
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
