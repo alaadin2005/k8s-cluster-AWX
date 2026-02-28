@@ -2,7 +2,7 @@
   become: yes
   tasks:
 
-    - name: Disable Swap
+    - name: Disable swap
       command: swapoff -a
 
     - name: Remove swap from fstab
@@ -11,15 +11,13 @@
         regexp: 'swap'
         state: absent
 
-    - name: Load required kernel modules
-      modprobe:
-        name: "{{ item }}"
-        state: present
+    - name: Load kernel modules
+      command: modprobe {{ item }}
       loop:
-        - br_netfilter
         - overlay
+        - br_netfilter
 
-    - name: Set sysctl parameters
+    - name: Enable required sysctl params
       sysctl:
         name: "{{ item.key }}"
         value: "{{ item.value }}"
