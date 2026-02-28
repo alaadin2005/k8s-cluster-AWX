@@ -2,7 +2,7 @@
   become: yes
   tasks:
 
-    - name: Join Kubernetes cluster
+    - name: Join cluster
       command: "{{ hostvars['k8s-master']['kube_join_cmd'] }} --ignore-preflight-errors=all"
       args:
         creates: /etc/kubernetes/kubelet.conf
