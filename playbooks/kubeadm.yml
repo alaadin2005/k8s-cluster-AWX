@@ -2,32 +2,23 @@
   become: yes
   tasks:
 
-    - name: Install required packages
-      apt:
-        name:
-          - apt-transport-https
-          - ca-certificates
-          - curl
-        state: present
-        update_cache: yes
-
     - name: Add Kubernetes GPG key
       shell: |
         curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.34/deb/Release.key | gpg --dearmor -o /usr/share/keyrings/kubernetes-archive-keyring.gpg
       args:
         creates: /usr/share/keyrings/kubernetes-archive-keyring.gpg
 
-    - name: Add Kubernetes apt repository
+    - name: Add Kubernetes repository
       shell: |
         echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.34/deb/ /" | tee /etc/apt/sources.list.d/kubernetes.list
       args:
         creates: /etc/apt/sources.list.d/kubernetes.list
 
-    - name: Update apt cache
+    - name: Update apt
       apt:
         update_cache: yes
 
-    - name: Install kube packages
+    - name: Install kubelet kubeadm kubectl
       apt:
         name:
           - kubelet
