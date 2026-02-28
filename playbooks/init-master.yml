@@ -2,29 +2,18 @@
   become: yes
   tasks:
 
-    - name: Reset previous cluster (ignore errors)
+    - name: Reset previous cluster
       command: kubeadm reset -f
       ignore_errors: yes
 
-    - name: Clean manifests
-      file:
-        path: /etc/kubernetes/manifests
-        state: absent
-
-    - name: Recreate manifests directory
-      file:
-        path: /etc/kubernetes/manifests
-        state: directory
-
-    - name: Initialize Kubernetes cluster
+    - name: Initialize cluster
       command: kubeadm init --pod-network-cidr=10.244.0.0/16
       register: init_output
 
-    - name: Extract kubeadm join command
+    - name: Extract join command
       set_fact:
         kube_join_cmd: >-
           {{ init_output.stdout_lines
              | select('search', 'kubeadm join')
              | list
-             | join(' ')
-          }}
+             | join(' ') }}
