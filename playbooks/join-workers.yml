@@ -1,14 +1,15 @@
+- name: Check if worker already joined
+  stat:
+    path: /etc/kubernetes/kubelet.conf
+  register: worker_joined
+
 - name: Generate join command
   command: kubeadm token create --print-join-command
   register: join_cmd
   delegate_to: master
   run_once: true
-
-- name: Check if worker already joined
-  stat:
-    path: /etc/kubernetes/kubelet.conf
-  register: kubelet_conf
+  when: not worker_joined.stat.exists
 
 - name: Join cluster
   command: "{{ join_cmd.stdout }}"
-  when: not kubelet_conf.stat.exists
+  when: not worker_joined.stat.exists
