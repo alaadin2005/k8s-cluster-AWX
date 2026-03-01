@@ -1,19 +1,10 @@
-- hosts: masters
-  become: yes
-  tasks:
+- name: Initialize cluster
+  command: kubeadm init --pod-network-cidr=192.168.0.0/16
+  args:
+    creates: /etc/kubernetes/admin.conf
 
-    - name: Reset previous cluster
-      command: kubeadm reset -f
-      ignore_errors: yes
-
-    - name: Initialize cluster
-      command: kubeadm init --pod-network-cidr=192.168.0.0/16
-      register: init_output
-
-    - name: Extract join command
-      set_fact:
-        kube_join_cmd: >-
-          {{ init_output.stdout_lines
-             | select('search', 'kubeadm join')
-             | list
-             | join(' ') }}
+- name: Setup kubeconfig
+  shell: |
+    mkdir -p /root/.kube
+    cp /etc/kubernetes/admin.conf /root/.kube/config
+    chmod 600 /root/.kube/config
