@@ -1,39 +1,31 @@
-- hosts: all
-  become: yes
-  tasks:
+- name: Install containerd
+  apt:
+    name: containerd
+    state: present
+    update_cache: yes
 
-    - name: Install dependencies
-      apt:
-        name:
-          - apt-transport-https
-          - ca-certificates
-          - curl
-          - gnupg
-        state: present
-        update_cache: yes
+- name: Create config dir
+  file:
+    path: /etc/containerd
+    state: directory
 
-    - name: Install containerd
-      apt:
-        name: containerd
-        state: present
+- name: Generate default config
+  command: containerd config default
+  register: containerd_config
 
-    - name: Create containerd directory
-      file:
-        path: /etc/containerd
-        state: directory
-        mode: '0755'
+- name: Save config
+  copy:
+    content: "{{ containerd_config.stdout }}"
+    dest: /etc/containerd/config.toml
 
-    - name: Generate containerd default config
-      command: containerd config default
-      register: containerd_config
+- name: Enable SystemdCgroup
+  replace:
+    path: /etc/containerd/config.toml
+    regexp: 'SystemdCgroup = false'
+    replace: 'SystemdCgroup = true'
 
-    - name: Save containerd config
-      copy:
-        content: "{{ containerd_config.stdout }}"
-        dest: /etc/containerd/config.toml
-
-    - name: Restart containerd
-      systemd:
-        name: containerd
-        state: restarted
-        enabled: yes
+- name: Restart containerd
+  systemd:
+    name: containerd
+    state: restarted
+    enabled: yes
