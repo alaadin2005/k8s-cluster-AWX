@@ -1,31 +1,30 @@
-- name: Install containerd
-  apt:
-    name: containerd
-    state: present
-    update_cache: yes
+- hosts: all
+  become: yes
 
-- name: Create config dir
-  file:
-    path: /etc/containerd
-    state: directory
+  tasks:
 
-- name: Generate default config
-  command: containerd config default
-  register: containerd_config
+    - name: Install containerd
+      apt:
+        name: containerd
+        state: present
+        update_cache: yes
 
-- name: Save config
-  copy:
-    content: "{{ containerd_config.stdout }}"
-    dest: /etc/containerd/config.toml
+    - name: Create containerd directory
+      file:
+        path: /etc/containerd
+        state: directory
 
-- name: Enable SystemdCgroup
-  replace:
-    path: /etc/containerd/config.toml
-    regexp: 'SystemdCgroup = false'
-    replace: 'SystemdCgroup = true'
+    - name: Generate default containerd config
+      command: containerd config default
+      register: containerd_config
 
-- name: Restart containerd
-  systemd:
-    name: containerd
-    state: restarted
-    enabled: yes
+    - name: Write containerd config
+      copy:
+        dest: /etc/containerd/config.toml
+        content: "{{ containerd_config.stdout }}"
+
+    - name: Restart containerd
+      service:
+        name: containerd
+        state: restarted
+        enabled: yes
