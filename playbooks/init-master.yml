@@ -7,7 +7,7 @@
       ignore_errors: yes
 
     - name: Initialize cluster
-      command: kubeadm init --pod-network-cidr=10.244.0.0/16
+      command: kubeadm init --pod-network-cidr=192.168.0.0/16
       register: init_output
 
     - name: Extract join command
