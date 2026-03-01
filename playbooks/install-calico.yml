@@ -2,6 +2,7 @@
   become: yes
 
   tasks:
+  
 - name: Check if Calico installed
   command: kubectl get daemonset calico-node -n kube-system
   environment:
