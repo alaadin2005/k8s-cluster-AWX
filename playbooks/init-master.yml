@@ -9,7 +9,7 @@
       register: kubeadm_init_check
 
     - name: Initialize Kubernetes Master
-      command: kubeadm init --pod-network-cidr=10.244.0.0/16
+      command: kubeadm init --pod-network-cidr=192.168.0.0/16
       when: not kubeadm_init_check.stat.exists
       register: kubeadm_init
 
