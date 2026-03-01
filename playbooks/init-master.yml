@@ -1,8 +1,32 @@
-- name: Check if cluster already initialized
-  stat:
-    path: /etc/kubernetes/admin.conf
-  register: cluster_init
+- hosts: master
+  become: yes
 
-- name: Initialize cluster
-  command: kubeadm init --pod-network-cidr=192.168.0.0/16
-  when: not cluster_init.stat.exists
+  tasks:
+
+    - name: Check if cluster already initialized
+      stat:
+        path: /etc/kubernetes/admin.conf
+      register: kubeadm_init_check
+
+    - name: Initialize Kubernetes Master
+      command: kubeadm init --pod-network-cidr=10.244.0.0/16
+      when: not kubeadm_init_check.stat.exists
+      register: kubeadm_init
+
+    - name: Create .kube directory
+      file:
+        path: /root/.kube
+        state: directory
+        mode: '0755'
+
+    - name: Copy admin.conf
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /root/.kube/config
+        remote_src: yes
+      when: kubeadm_init_check.stat.exists or kubeadm_init is changed
+
+    - name: Fix permissions
+      file:
+        path: /root/.kube/config
+        mode: '0644'
