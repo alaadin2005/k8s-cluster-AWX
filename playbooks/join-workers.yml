@@ -1,13 +1,14 @@
-- hosts: master
-  become: yes
-  tasks:
+- name: Generate join command
+  command: kubeadm token create --print-join-command
+  register: join_cmd
+  delegate_to: master
+  run_once: true
 
-    - name: Generate join command
-      command: kubeadm token create --print-join-command
-      register: join_cmd
+- name: Reset worker
+  shell: |
+    kubeadm reset -f
+    rm -rf /etc/kubernetes
+  ignore_errors: yes
 
-    - name: Join workers to cluster
-      become: yes
-      delegate_to: "{{ item }}"
-      command: "{{ join_cmd.stdout }}"
-      loop: "{{ groups['workers'] }}"
+- name: Join cluster
+  command: "{{ join_cmd.stdout }}"
