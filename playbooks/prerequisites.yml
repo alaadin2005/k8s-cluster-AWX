@@ -1,5 +1,9 @@
-- name: Disable swap
-  command: swapoff -a
+- hosts: all
+  become: yes
+  tasks:
+
+    - name: Disable swap
+      command: swapoff -a
 
 - name: Remove swap from fstab
   replace:
