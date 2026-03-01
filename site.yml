@@ -1,0 +1,17 @@
+- hosts: all
+  become: yes
+  roles:
+    - common
+    - containerd
+    - kubernetes
+
+- hosts: master
+  become: yes
+  roles:
+    - master
+    - calico
+
+- hosts: workers
+  become: yes
+  roles:
+    - workers
