@@ -4,11 +4,11 @@
   delegate_to: master
   run_once: true
 
-- name: Reset worker
-  shell: |
-    kubeadm reset -f
-    rm -rf /etc/kubernetes
-  ignore_errors: yes
+- name: Check if worker already joined
+  stat:
+    path: /etc/kubernetes/kubelet.conf
+  register: kubelet_conf
 
 - name: Join cluster
   command: "{{ join_cmd.stdout }}"
+  when: not kubelet_conf.stat.exists
