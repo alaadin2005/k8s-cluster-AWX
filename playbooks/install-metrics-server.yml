@@ -2,16 +2,17 @@
   become: yes
 
   tasks:
-  
-- name: Check metrics server
-  command: kubectl get deployment metrics-server -n kube-system
-  environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
-  register: metrics_check
-  ignore_errors: yes
 
-- name: Install Metrics Server
-  command: kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-  environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
-  when: metrics_check.rc != 0
+    - name: Check if Metrics Server already installed
+      command: kubectl get deployment metrics-server -n kube-system
+      register: metrics_check
+      failed_when: false
+      changed_when: false
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+
+    - name: Install Metrics Server
+      command: kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+      when: metrics_check.rc != 0
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
