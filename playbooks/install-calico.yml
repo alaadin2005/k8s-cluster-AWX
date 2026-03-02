@@ -2,16 +2,17 @@
   become: yes
 
   tasks:
-  
-- name: Check if Calico installed
-  command: kubectl get daemonset calico-node -n kube-system
-  environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
-  register: calico_check
-  ignore_errors: yes
 
-- name: Install Calico
-  command: kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.2/manifests/calico.yaml
-  environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
-  when: calico_check.rc != 0
+    - name: Check if Calico already installed
+      command: kubectl get daemonset calico-node -n kube-system
+      register: calico_check
+      failed_when: false
+      changed_when: false
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+
+    - name: Install Calico CNI
+      command: kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.2/manifests/calico.yaml
+      when: calico_check.rc != 0
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
